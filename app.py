@@ -29,7 +29,7 @@ Bienvenue dans D-Tracker, votre application de suivi des dépenses personnelles 
 - **Nouvelle Dépense** : Enregistrer une nouvelle dépense
 - **Analyses** : Analyses détaillées par catégorie
 - **Historique** : Consulter l'historique des dépenses
-- **Catégories** : Créer et modifier les catégories
+- **Gérer les Catégories** : Créer et modifier les catégories
 
 Utilisez la barre latérale pour naviguer entre les différentes sections.
 """)
