@@ -148,20 +148,21 @@ class ExpenseDatabase:
         query = '''
             SELECT c.name as category, c.color, SUM(e.amount) as total, COUNT(e.id) as count
             FROM expenses e
-            LEFT JOIN categories c ON e.category_id = c.id
+            INNER JOIN categories c ON e.category_id = c.id
         '''
         
         params = []
-        if start_date or end_date:
-            query += ' WHERE'
-            conditions = []
-            if start_date:
-                conditions.append('e.date >= ?')
-                params.append(start_date)
-            if end_date:
-                conditions.append('e.date <= ?')
-                params.append(end_date)
-            query += ' ' + ' AND '.join(conditions)
+        conditions = []
+        
+        if start_date:
+            conditions.append('e.date >= ?')
+            params.append(start_date)
+        if end_date:
+            conditions.append('e.date <= ?')
+            params.append(end_date)
+        
+        if conditions:
+            query += ' WHERE ' + ' AND '.join(conditions)
         
         query += '''
             GROUP BY c.id, c.name, c.color
@@ -265,5 +266,32 @@ class ExpenseDatabase:
         '''
         
         df = pd.read_sql_query(query, conn, params=[start_date, end_date])
+        conn.close()
+        return df
+    
+    def get_daily_expenses_by_category(self, start_date, end_date, category_names=None):
+        """Récupère les dépenses quotidiennes par catégorie pour une période donnée"""
+        conn = sqlite3.connect(self.db_path)
+        
+        query = '''
+            SELECT e.date, c.name as category, c.color, SUM(e.amount) as total
+            FROM expenses e
+            INNER JOIN categories c ON e.category_id = c.id
+            WHERE e.date >= ? AND e.date <= ?
+        '''
+        
+        params = [start_date, end_date]
+        
+        if category_names:
+            placeholders = ','.join(['?' for _ in category_names])
+            query += f' AND c.name IN ({placeholders})'
+            params.extend(category_names)
+        
+        query += '''
+            GROUP BY e.date, c.id, c.name, c.color
+            ORDER BY e.date ASC, c.name ASC
+        '''
+        
+        df = pd.read_sql_query(query, conn, params=params)
         conn.close()
         return df

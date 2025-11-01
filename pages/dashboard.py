@@ -53,6 +53,7 @@ st.markdown("---")
 # Répartition par catégorie
 st.subheader("Répartition par Catégorie")
 category_stats = db.get_stats_by_category(start_date, end_date)
+print(category_stats)
 render_category_progress(category_stats)
 
 # Graphique d'évolution quotidienne
