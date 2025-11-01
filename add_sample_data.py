@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script pour ajouter des données d'exemple au D-Tracker
-Génère des dépenses réalistes sur les 30 derniers jours
+Génère des dépenses réalistes sur les deux dernières années
 """
 
 import sqlite3
@@ -22,6 +22,11 @@ def add_sample_data():
     # Descriptions réalistes par catégorie
     descriptions = {
         'Alimentation': [
+            'Déjeuner au restaurant', 'Courses Carrefour', 'Petit-déjeuner café', 
+            'Dîner avec amis', 'Commande Uber Eats', 'Sandwich midi',
+            'Courses bio', 'Restaurant italien', 'Fast-food', 'Épicerie'
+        ],
+        'Nourriture': [
             'Déjeuner au restaurant', 'Courses Carrefour', 'Petit-déjeuner café', 
             'Dîner avec amis', 'Commande Uber Eats', 'Sandwich midi',
             'Courses bio', 'Restaurant italien', 'Fast-food', 'Épicerie'
@@ -64,20 +69,23 @@ def add_sample_data():
         ]
     }
     
-    # Générer des dépenses sur les 30 derniers jours
+    # Générer des dépenses sur les deux dernières années (730 jours)
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=30)
+    start_date = end_date - timedelta(days=730)
     
-    print("🔄 Génération des données d'exemple...")
+    print("🔄 Génération des données d'exemple sur 2 ans...")
     
     expenses_added = 0
+    total_days = 730
     
-    for day in range(30):
+    # Pour chaque jour sur 2 ans
+    for day in range(total_days + 1):  # +1 pour inclure aujourd'hui
         current_date = start_date + timedelta(days=day)
         date_str = current_date.strftime("%Y-%m-%d")
         
         # Nombre de dépenses par jour (0-4, plus probable d'avoir 1-2)
-        num_expenses = random.choices([0, 1, 2, 3, 4], weights=[10, 40, 30, 15, 5])[0]
+        # Réduire légèrement la probabilité d'avoir des dépenses pour certaines dates
+        num_expenses = random.choices([0, 1, 2, 3, 4], weights=[15, 35, 30, 15, 5])[0]
         
         for _ in range(num_expenses):
             # Sélectionner une catégorie aléatoire
@@ -85,7 +93,7 @@ def add_sample_data():
             category_id = category_dict[category_name]
             
             # Montant réaliste selon la catégorie
-            if category_name == 'Alimentation':
+            if category_name in ['Alimentation', 'Nourriture']:
                 amount = round(random.uniform(5, 50), 2)
             elif category_name == 'Transport':
                 amount = round(random.uniform(10, 80), 2)
@@ -102,8 +110,12 @@ def add_sample_data():
             else:  # Autres
                 amount = round(random.uniform(5, 100), 2)
             
-            # Description aléatoire
-            description = random.choice(descriptions[category_name])
+            # Description aléatoire (avec fallback pour les catégories non définies)
+            if category_name in descriptions:
+                description = random.choice(descriptions[category_name])
+            else:
+                # Fallback pour les catégories non définies
+                description = f"Dépense {category_name.lower()}"
             
             # Ajouter la dépense
             try:
@@ -112,7 +124,7 @@ def add_sample_data():
             except Exception as e:
                 print(f"❌ Erreur lors de l'ajout de la dépense : {e}")
     
-    print(f"✅ {expenses_added} dépenses d'exemple ajoutées avec succès !")
+    print(f"✅ {expenses_added} dépenses d'exemple ajoutées avec succès sur 2 ans !")
     
     # Afficher quelques statistiques
     print("\n📊 Statistiques générées :")
